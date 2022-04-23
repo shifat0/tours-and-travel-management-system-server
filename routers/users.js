@@ -34,6 +34,10 @@ router.get(`/get/count`, async (req, res) => {
 
 // Post Method
 router.post("/", async (req, res) => {
+  const existingUser = await User.findOne({ email: req.body.email });
+  if (existingUser)
+    return res.status(401).send({ message: "User already exist" });
+
   const user = await new User({
     name: req.body.name,
     email: req.body.email,
@@ -42,6 +46,7 @@ router.post("/", async (req, res) => {
     city: req.body.city,
     country: req.body.country,
     isAdmin: req.body.isAdmin,
+    success: req.body.success,
   }).save();
 
   if (!user) return res.status(400).send("User cannot be created");
@@ -52,7 +57,7 @@ router.post("/", async (req, res) => {
 router.post("/login", async (req, res) => {
   const user = await User.findOne({ email: req.body.email });
 
-  if (!user) return res.status(400).send("The user is not found");
+  if (!user) return res.status(401).send({ message: "The user is not found" });
 
   // matching password with db
   if (user && bcrypt.compareSync(req.body.password, user.passwordHash)) {
@@ -67,8 +72,8 @@ router.post("/login", async (req, res) => {
       `${process.env.SECRET}`, // secret key of jsonwebtoken
       { expiresIn: "1d" }
     );
-    return res.status(200).send({ user: user.email, token: token });
-  } else return res.status(400).send("password is wrong!");
+    return res.status(200).send({ email: user.email, token: token });
+  } else return res.status(401).send({ message: "Password is wrong!" });
 });
 
 // Delete Method

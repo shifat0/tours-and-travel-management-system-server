@@ -14,7 +14,7 @@ const userSchema = new mongoose.Schema({
     required: true,
   },
   phone: {
-    type: Number,
+    type: String,
     required: true,
   },
   city: {
@@ -27,7 +27,11 @@ const userSchema = new mongoose.Schema({
   },
   isAdmin: {
     type: Boolean,
-    required: true,
+    default: false,
+  },
+  success: {
+    type: Boolean,
+    default: true,
   },
 });
 
