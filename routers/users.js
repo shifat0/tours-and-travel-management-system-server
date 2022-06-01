@@ -26,7 +26,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // getting total user count
-router.get(`/get/count`, async (req, res) => {
+router.get("/get/count", async (req, res) => {
   const userCount = await User.countDocuments();
   if (!userCount) res.status(500).json({ success: false });
   res.send({ userCount: userCount });
@@ -56,8 +56,8 @@ router.post("/", async (req, res) => {
 // user authentication
 router.post("/login", async (req, res) => {
   const user = await User.findOne({ email: req.body.email });
-
-  if (!user) return res.status(401).send({ message: "The user is not found" });
+  if (!user)
+    return res.status(401).send({ message: "Email or Password is wrong!" });
 
   // matching password with db
   if (user && bcrypt.compareSync(req.body.password, user.passwordHash)) {
@@ -72,8 +72,39 @@ router.post("/login", async (req, res) => {
       `${process.env.SECRET}`, // secret key of jsonwebtoken
       { expiresIn: "1d" }
     );
-    return res.status(200).send({ email: user.email, token: token });
-  } else return res.status(401).send({ message: "Password is wrong!" });
+    return res
+      .status(200)
+      .send({ email: user.email, token: token, isAdmin: user.isAdmin });
+  } else
+    return res.status(401).send({ message: "Email or Password is wrong!" });
+});
+
+// admin authentication
+router.post("/admin/login", async (req, res) => {
+  const user = await User.findOne({ email: req.body.email });
+  if (!user)
+    return res.status(401).send({ message: "Email or Password is wrong!" });
+  if (!user.isAdmin)
+    return res.status(401).send({ message: "You are not an admin!" });
+
+  // matching password with db
+  if (user && bcrypt.compareSync(req.body.password, user.passwordHash)) {
+    // token for user
+    // sign takes 3 parameter
+    const token = jwt.sign(
+      // sending data with token so that hacker cant edit admin
+      {
+        userId: user.id,
+        isAdmin: user.isAdmin,
+      },
+      `${process.env.SECRET}`, // secret key of jsonwebtoken
+      { expiresIn: "1d" }
+    );
+    return res
+      .status(200)
+      .send({ email: user.email, token: token, isAdmin: user.isAdmin });
+  } else
+    return res.status(401).send({ message: "Email or Password is wrong!" });
 });
 
 // Delete Method

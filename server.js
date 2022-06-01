@@ -7,6 +7,7 @@ require("dotenv/config");
 
 const api = process.env.API_URL;
 const userRouter = require("./routers/users");
+const eventRouter = require("./routers/events");
 const errorHandler = require("./helpers/errorHandler");
 
 // Middlewears
@@ -14,10 +15,12 @@ app.use(cors());
 app.use(express.json());
 app.options("*", cors());
 app.use(morgan("tiny"));
+app.use("/public/uploads", express.static(__dirname + "/public/uploads"));
 app.use(errorHandler);
 
 // Routers
 app.use(`${api}/users`, userRouter);
+app.use(`${api}/events`, eventRouter);
 
 // Database Connection
 mongoose
