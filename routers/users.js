@@ -72,9 +72,12 @@ router.post("/login", async (req, res) => {
       `${process.env.SECRET}`, // secret key of jsonwebtoken
       { expiresIn: "1d" }
     );
-    return res
-      .status(200)
-      .send({ email: user.email, token: token, isAdmin: user.isAdmin });
+    return res.status(200).send({
+      name: user.name,
+      email: user.email,
+      token: token,
+      isAdmin: user.isAdmin,
+    });
   } else
     return res.status(401).send({ message: "Email or Password is wrong!" });
 });
